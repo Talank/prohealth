@@ -20,7 +20,7 @@ Feature: login
     Examples:
       | email           | password      | message                                                                                          |
       | test12@test.com | password12345 | User with that email doesnot exists!                                                             |
-      | test@test.com   | pass12345     | The email or password you entered is incorrect! Please make sure your email or password is valid |
+      | test@test.com   | passw12345    | The email or password you entered is incorrect! Please make sure your email or password is valid |
       | test12@test.com | pass12345     | User with that email doesnot exists!                                                             |
       | test@test.co    | password12345 | User with that email doesnot exists!                                                             |
 

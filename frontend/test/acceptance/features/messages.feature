@@ -5,8 +5,8 @@ Feature:view messages
   So that i see the messages send to me by others
 
   Background:
-    Given user has created an account with email "test@test.com" and password "password12345"
-    And a user with email "test@test.com" and password "password12345" has logged in
+    Given user has created an account with email "test@test.com" and password "pass12345"
+    And a user with email "test@test.com" and password "pass12345" has logged in
 
   Scenario: view top new messages
     When the user hovers to the message icon on the webUI

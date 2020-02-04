@@ -1,4 +1,4 @@
-export const ROOT_URL = 'http://localhost:8000';
+export const ROOT_URL = process.env.ROOT_URL || 'http://172.17.0.1:8000';
 
 export const AuthUrls = {
     LOGIN: `${ROOT_URL}/api/login/`,

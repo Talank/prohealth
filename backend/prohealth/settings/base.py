@@ -29,7 +29,7 @@ env = environ.Env()
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = env.bool('DJANGO_DEBUG', False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # APP CONFIGURATION
 # ------------------------------------------------------------------------------

@@ -8,13 +8,16 @@ const notificationBell = '//div//a[@href="/notifications"]/i[.="notifications"]'
 const seeAllNotifications= '//span/a[@href="/notifications"]/../following-sibling::div//a[@href="/notifications"]';
 
 Given('a user with email {string} and password {string} has logged in', function (email, password) {
-
-    return client.url(client.launch_url + '/user/login').useXpath()
-        .waitForElementVisible(emailField).setValue(emailField, email)
-        .setValue(passwordField, password)
-        .click(loginButton).pause(3000)
-        .useCss();
-
+    // return client.url(client.launch_url + '/user/login').useXpath()
+    //     .waitForElementVisible(emailField)
+    //     .setValue(emailField, email)
+    //     .setValue(passwordField, password)
+    //     .click(loginButton).pause(3000)
+    //     .useCss();
+    return client.page.loginPage().navigate()
+        .isLoginFormVisible()
+        .setUsernamePassword(email, password)
+        .triesLogin()
 });
 
 When('the user hovers to the bell icon on the webUI', function () {

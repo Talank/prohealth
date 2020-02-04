@@ -1,0 +1,68 @@
+dist: bionic
+language: node_js
+node_js:
+  - 12.14.1
+addons:
+#  hosts:
+#    - prohealth
+  apt:
+    packages:
+      - "python3"
+      - "python3-setuptools"
+      - "python3-pip"
+services:
+  - postgresql
+  - docker
+env:
+  global:
+    - SELENIUM_HOST=127.0.0.1
+    - SERVER_URL=http://172.17.0.1:8000
+    - LAUNCH_URL=http://172.17.0.1:3000
+    - POSTGRES_DBNAME=prohealth
+    - POSTGRES_HOST=127.0.0.1
+    - POSTGRES_PORT=5432
+    - POSTGRES_USER=db_user
+    - POSTGRES_PASSWORD=password
+    - ROOT_URL=http://172.17.0.1:8000
+
+before_install:
+  - sudo pip3 install --upgrade pip
+  - docker run -d -p 4444:4444 -p 5900:5900 -v /dev/shm:/dev/shm --name selenium selenium/standalone-chrome-debug
+#  - sudo apt-get update
+#  - sudo apt-get install -y xvfb libappindicator1 fonts-liberation
+#  - wget http://security.ubuntu.com/ubuntu/pool/universe/c/chromium-browser/chromium-browser_79.0.3945.79-0ubuntu0.19.10.2_amd64.deb
+#  - wget https://chromedriver.storage.googleapis.com/79.0.3945.36/chromedriver_linux64.zip
+#  - wget https://bit.ly/2TlkRyu
+#  - unzip chromedriver_linux64.zip
+#  - sudo dpkg -i chromium-browser*.deb
+#  - ls -la
+#  - mv 2TlkRyu 2TlkRyu.jar
+#  - java -jar 2TlkRyu.jar -port 4444
+
+install:
+  - pip3 install -r backend/requirements/local.txt
+  - cd frontend/
+  - npm install
+  - cd ..
+
+before_script:
+  - psql -c "CREATE USER db_user WITH PASSWORD 'password';"
+  - psql -c "CREATE DATABASE prohealth;"
+  - psql -c "GRANT all ON DATABASE prohealth TO db_user;"
+  - cd backend
+  - python3 manage.py migrate
+  - python3 manage.py shell -c "from user_profile.models import User; User.objects.create_superuser('admin@prohealth.com', 'pass1234')"
+  - python3 manage.py runserver 0.0.0.0:8000 >> log.log 2>&1&
+  - cd $TRAVIS_BUILD_DIR/frontend/
+  - npm start >> npm.log&
+  - sleep 20
+script:
+  - cd $TRAVIS_BUILD_DIR/frontend/
+  - npm run test-e2e test/acceptance/features
+
+after_script:
+  - cat log.log
+
+cache:
+  pip: true
+  npm: true

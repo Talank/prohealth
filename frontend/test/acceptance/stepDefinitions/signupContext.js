@@ -1,6 +1,7 @@
-const {Given, When, Then} = require('cucumber');
+const {After, Given, When, Then} = require('cucumber');
 const {client} = require('nightwatch-api');
 const assert = require('assert');
+const fetch = require('node-fetch');
 
 const firstNameField = '//div/input[@name="first_name"]';
 const lastNameField = '//div/input[@name="last_name"]';
@@ -12,9 +13,35 @@ const genderField = '//div[@class="ant-select-selection__rendered"]';
 const signupButton = '//div/button[.= "Signup"]';
 const successMsg = '//div//span[.="signed up succesfully"]'
 
+const createdUser = {};
 
 Given('user has browsed to the signup page', function () {
     return client.url(client.launch_url + '/user/signup')
+});
+
+Given('user has created an account with email {string} and password {string}', function (email, password) {
+    console.log(`Basic ` + `${client.globals.admin_username}:${client.globals.admin_password}`)
+    const header = {}
+    header['Authorization'] = `Basic ` +   Buffer.from(`${client.globals.admin_username}:${client.globals.admin_password}`).toString('base64')
+    header['Content-Type'] = 'application/json'
+    return fetch(client.globals.backend_url + '/api/users/', {
+        method: 'POST',
+        body: JSON.stringify({
+            first_name: "Test", last_name: "User", email, password, gender: "M", date_of_birth: "2020-02-12"
+        }),
+        headers: header
+    })
+        .then(res => {
+            console.log(res.status)
+            if (res.status <200 || res.status>=400){
+                throw new Error("Failed to create user: "+ res.statusText)
+            }
+            return res.text()
+        })
+        .then(res => {
+            console.log(JSON.parse(res)['id'])
+            createdUser[email] =  JSON.parse(res)['id'];
+        })
 });
 
 When('user tries to signup using the webUI by entering the following details in the signup form:', function (dataTable) {
@@ -125,3 +152,22 @@ When('user tries to signup entering email {string} password {string} and confirm
         .useCss()
 });
 
+
+After(async () => {
+    for (const email in createdUser) {
+
+        const header = {}
+        header['Authorization'] = `Basic ` + Buffer.from(`${client.globals.admin_username}:${client.globals.admin_password}`).toString('base64')
+        header['Content-Type'] = 'application/json'
+        await fetch(client.globals.backend_url + '/api/users/' + createdUser[email], {
+            method: 'DELETE',
+            headers: header
+        })
+            .then(res => {
+                console.log(res.status)
+                if (res.status < 200 || res.status >= 400) {
+                    throw new Error("Failed to create user: " + res.statusText)
+                }
+            })
+    }
+})

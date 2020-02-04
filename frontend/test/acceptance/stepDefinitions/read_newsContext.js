@@ -7,13 +7,11 @@ const loginButton = '//div/form/button[.="Log In"]';
 const newsButton = '//div[.="News"]';
 
 When('user selects News', function () {
-    return client.useXpath().waitForElementVisible(newsButton)
-        .click(newsButton)
-        .useCss();
+    return client.page.sidebarPage().selectNewsButton()
 });
 
 Then('a list of news headlines and little description should be shown', function () {
-   return client.url(client.launch_url + '/news');
+   return client.page.sidebarPage().getNews();
 });
 
 Given('user has entered email {string} and password {string} in the login form', function (email, password) {
